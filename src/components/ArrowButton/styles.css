@@ -1,0 +1,12 @@
+.arrowButton {
+  background: transparent;
+  border: transparent;
+  border-radius: 50%;
+  height: 10px;
+  width: 10px;
+  cursor: pointer;
+}
+.arrowButton svg {
+  margin-left: 4px;
+  color: #3a3a3a;
+}

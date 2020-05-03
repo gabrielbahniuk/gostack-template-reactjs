@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import income from '../../assets/income.svg';
 import outcome from '../../assets/outcome.svg';
 import total from '../../assets/total.svg';
-
+import ArrowButton from '../../components/ArrowButton';
 import api from '../../services/api';
 
 import Header from '../../components/Header';
@@ -12,7 +12,9 @@ import formatDate from '../../utils/formatDate';
 
 import { Container, CardContainer, Card, TableContainer } from './styles';
 
-interface Transaction {
+import { sortByField, Request } from '../../utils/sortByField';
+
+export interface Transaction {
   id: string;
   title: string;
   value: number;
@@ -32,17 +34,43 @@ interface Balance {
 const Dashboard: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [balance, setBalance] = useState<Balance>({} as Balance);
+  const [sortBy, setSortBy] = useState({ field: 'title', order: 'desc' });
+  const [transactionType, setTransactionType] = useState('all');
 
   useEffect(() => {
     async function loadTransactions(): Promise<void> {
       const { data } = await api.get('transactions');
-
       setTransactions(data.transactions);
       setBalance(data.balance);
     }
 
     loadTransactions();
   }, []);
+
+  const updateTransactionOrder = useCallback(() => {
+    const sortedTransactions = sortByField({
+      options: sortBy as Request['options'],
+      transactions,
+    });
+    setTransactions(sortedTransactions);
+  }, [sortBy, transactions]);
+
+  const handleSortByChange = (newField: string): void => {
+    const { field, order } = sortBy;
+    if (newField !== field) {
+      setSortBy({ order: 'desc', field: newField });
+    } else {
+      const newOrder = order === 'desc' ? 'asc' : 'desc';
+      setSortBy({ order: newOrder, field: newField });
+    }
+  };
+
+  useEffect(() => {
+    updateTransactionOrder();
+  }, [sortBy]);
+
+  const handleTransactionType = (transactionFilter: string): void =>
+    setTransactionType(transactionFilter);
 
   return (
     <>
@@ -51,8 +79,13 @@ const Dashboard: React.FC = () => {
         <CardContainer>
           <Card>
             <header>
-              <p>Entradas</p>
-              <img src={income} alt="Income" />
+              <p>Income</p>
+              <button
+                type="button"
+                onClick={() => handleTransactionType('income')}
+              >
+                <img src={income} alt="Income" />
+              </button>
             </header>
             <h1 data-testid="balance-income">
               {formatValue(Number(balance.income))}
@@ -60,8 +93,13 @@ const Dashboard: React.FC = () => {
           </Card>
           <Card>
             <header>
-              <p>Saídas</p>
-              <img src={outcome} alt="Outcome" />
+              <p>Outcome</p>
+              <button
+                type="button"
+                onClick={() => handleTransactionType('outcome')}
+              >
+                <img src={outcome} alt="Outcome" />
+              </button>
             </header>
             <h1 data-testid="balance-outcome">
               {formatValue(Number(balance.outcome))}
@@ -70,7 +108,12 @@ const Dashboard: React.FC = () => {
           <Card total>
             <header>
               <p>Total</p>
-              <img src={total} alt="Total" />
+              <button
+                type="button"
+                onClick={() => handleTransactionType('all')}
+              >
+                <img src={total} alt="Total" />
+              </button>
             </header>
             <h1 data-testid="balance-total">
               {formatValue(Number(balance.total))}
@@ -82,28 +125,63 @@ const Dashboard: React.FC = () => {
           <table>
             <thead>
               <tr>
-                <th>Título</th>
-                <th>Preço</th>
-                <th>Categoria</th>
-                <th>Data</th>
+                <th>
+                  <p>Title</p>
+                  <ArrowButton
+                    onClick={() => handleSortByChange('title')}
+                    isDown={sortBy.order !== 'desc'}
+                  />
+                </th>
+                <th>
+                  <p>Value</p>
+                  <ArrowButton
+                    onClick={() => handleSortByChange('value')}
+                    isDown={sortBy.order !== 'desc'}
+                  />
+                </th>
+                <th>
+                  <p>Category</p>
+                  <ArrowButton
+                    onClick={() => handleSortByChange('category')}
+                    isDown={sortBy.order !== 'desc'}
+                  />
+                </th>
+                <th>
+                  <p>Date</p>
+                  <ArrowButton
+                    onClick={() => handleSortByChange('created_at')}
+                    isDown={sortBy.order !== 'desc'}
+                  />
+                </th>
               </tr>
             </thead>
 
             <tbody>
-              {transactions.length > 0 &&
-                transactions.map(transaction => (
-                  <tr key={transaction.id}>
-                    <td className="title">{transaction.title}</td>
-
-                    <td className={transaction.type}>
-                      {transaction.type === 'outcome' ? ' - ' : ''}
-                      {formatValue(Number(transaction.value))}
-                    </td>
-
-                    <td>{transaction.category.title}</td>
-                    <td>{formatDate(transaction.created_at)}</td>
-                  </tr>
-                ))}
+              {transactionType === 'all'
+                ? transactions.map(transaction => (
+                    <tr key={transaction.id}>
+                      <td className="title">{transaction.title}</td>
+                      <td className={transaction.type}>
+                        {transaction.type === 'outcome' ? ' - ' : ''}
+                        {formatValue(Number(transaction.value))}
+                      </td>
+                      <td>{transaction.category.title}</td>
+                      <td>{formatDate(transaction.created_at)}</td>
+                    </tr>
+                  ))
+                : transactions
+                    .filter(transaction => transactionType === transaction.type)
+                    .map(transaction => (
+                      <tr key={transaction.id}>
+                        <td className="title">{transaction.title}</td>
+                        <td className={transaction.type}>
+                          {transaction.type === 'outcome' ? ' - ' : ''}
+                          {formatValue(Number(transaction.value))}
+                        </td>
+                        <td>{transaction.category.title}</td>
+                        <td>{formatDate(transaction.created_at)}</td>
+                      </tr>
+                    ))}
             </tbody>
           </table>
         </TableContainer>

@@ -5,7 +5,7 @@ interface CardProps {
 }
 
 export const Container = styled.div`
-  width: 100%;
+  max-width: 100%;
   max-width: 1120px;
   margin: 0 auto;
   padding: 40px 20px;
@@ -37,6 +37,10 @@ export const Card = styled.div`
     p {
       font-size: 16px;
     }
+    button {
+      background-color: transparent;
+      border: 0;
+    }
   }
 
   h1 {
@@ -49,11 +53,15 @@ export const Card = styled.div`
 
 export const TableContainer = styled.section`
   margin-top: 64px;
-
+  max-width: 1120px;
   table {
+    word-break: break-all;
     width: 100%;
     border-spacing: 0 8px;
 
+    tbody {
+      justify-content: space-around;
+    }
     th {
       color: #969cb3;
       font-weight: normal;
@@ -61,6 +69,20 @@ export const TableContainer = styled.section`
       text-align: left;
       font-size: 16px;
       line-height: 24px;
+
+      p {
+        display: inline;
+      }
+
+      button {
+        border: none;
+        background-color: transparent;
+        transition: color 0.2s;
+
+        &:hover {
+          color: #444952;
+        }
+      }
     }
 
     td {
