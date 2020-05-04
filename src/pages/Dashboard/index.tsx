@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import income from '../../assets/income.svg';
-import outcome from '../../assets/outcome.svg';
-import total from '../../assets/total.svg';
+import { ReactComponent as IncomeIcon } from '../../assets/income.svg';
+import { ReactComponent as OutcomeIcon } from '../../assets/outcome.svg';
+import { ReactComponent as TotalIcon } from '../../assets/total.svg';
 import ArrowButton from '../../components/ArrowButton';
 import api from '../../services/api';
 
@@ -33,7 +33,11 @@ interface Balance {
 
 const Dashboard: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [balance, setBalance] = useState<Balance>({} as Balance);
+  const [balance, setBalance] = useState<Balance>({
+    income: '0',
+    outcome: '0',
+    total: '0',
+  } as Balance);
   const [sortBy, setSortBy] = useState({ field: 'title', order: 'desc' });
   const [transactionType, setTransactionType] = useState('all');
 
@@ -77,32 +81,32 @@ const Dashboard: React.FC = () => {
       <Header />
       <Container>
         <CardContainer>
-          <Card>
+          <Card name="income">
             <header>
               <p>Income</p>
               <button
                 type="button"
                 onClick={() => handleTransactionType('income')}
               >
-                <img src={income} alt="Income" />
+                <IncomeIcon />
               </button>
             </header>
             <h1 data-testid="balance-income">
-              {formatValue(Number(balance.income))}
+              {balance.income && formatValue(Number(balance.income))}
             </h1>
           </Card>
-          <Card>
+          <Card name="outcome">
             <header>
               <p>Outcome</p>
               <button
                 type="button"
                 onClick={() => handleTransactionType('outcome')}
               >
-                <img src={outcome} alt="Outcome" />
+                <OutcomeIcon />
               </button>
             </header>
             <h1 data-testid="balance-outcome">
-              {formatValue(Number(balance.outcome))}
+              {balance.outcome && formatValue(Number(balance.outcome))}
             </h1>
           </Card>
           <Card total>
@@ -112,11 +116,11 @@ const Dashboard: React.FC = () => {
                 type="button"
                 onClick={() => handleTransactionType('all')}
               >
-                <img src={total} alt="Total" />
+                <TotalIcon />
               </button>
             </header>
             <h1 data-testid="balance-total">
-              {formatValue(Number(balance.total))}
+              {balance.total && formatValue(Number(balance.total))}
             </h1>
           </Card>
         </CardContainer>
@@ -129,28 +133,28 @@ const Dashboard: React.FC = () => {
                   <p>Title</p>
                   <ArrowButton
                     onClick={() => handleSortByChange('title')}
-                    isDown={sortBy.order !== 'desc'}
+                    isDown={sortBy.order !== 'asc'}
                   />
                 </th>
                 <th>
                   <p>Value</p>
                   <ArrowButton
                     onClick={() => handleSortByChange('value')}
-                    isDown={sortBy.order !== 'desc'}
+                    isDown={sortBy.order !== 'asc'}
                   />
                 </th>
                 <th>
                   <p>Category</p>
                   <ArrowButton
                     onClick={() => handleSortByChange('category')}
-                    isDown={sortBy.order !== 'desc'}
+                    isDown={sortBy.order !== 'asc'}
                   />
                 </th>
                 <th>
                   <p>Date</p>
                   <ArrowButton
                     onClick={() => handleSortByChange('created_at')}
-                    isDown={sortBy.order !== 'desc'}
+                    isDown={sortBy.order !== 'asc'}
                   />
                 </th>
               </tr>

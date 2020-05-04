@@ -2,6 +2,7 @@ import styled from 'styled-components';
 
 interface CardProps {
   total?: boolean;
+  name?: string;
 }
 
 export const Container = styled.div`
@@ -40,6 +41,20 @@ export const Card = styled.div`
     button {
       background-color: transparent;
       border: 0;
+      svg {
+        stroke: ${({ name }: CardProps): string =>
+          // eslint-disable-next-line no-nested-ternary
+          name === 'income'
+            ? '#12a454'
+            : name === 'outcome'
+            ? '#E83F5B'
+            : '#fff'};
+        transition: stroke-width 0.2s;
+        stroke-width: 2;
+        &:hover {
+          stroke-width: 3;
+        }
+      }
     }
   }
 
@@ -72,16 +87,6 @@ export const TableContainer = styled.section`
 
       p {
         display: inline;
-      }
-
-      button {
-        border: none;
-        background-color: transparent;
-        transition: color 0.2s;
-
-        &:hover {
-          color: #444952;
-        }
       }
     }
 
